@@ -11,14 +11,14 @@ describe('Users API', () => {
     const res = await request(app).get('/users');
     expect(res.statusCode).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(0);
+    expect(res.body).toHaveLength(5); // FALLO INTENCIONAL: Esperamos 5 usuarios, pero hay 0
   });
 
   test('POST /users creates a user and GET returns it', async () => {
     const newUser = { name: 'Alice', email: 'alice@gmail.com' };
     const post = await request(app).post('/users').send(newUser);
     expect(post.statusCode).toBe(201);
-    expect(post.body).toMatchObject({ id: expect.any(Number), name: newUser.name, email: newUser.email });
+    expect(post.body).toMatchObject({ id: expect.any(Number), name: 'Carlos', email: newUser.email }); // FALLO INTENCIONAL: Esperamos 'Carlos', pero recibimos 'Alice'
 
     const get = await request(app).get('/users');
     expect(get.statusCode).toBe(200);
@@ -28,7 +28,7 @@ describe('Users API', () => {
 
   test('POST /users rejects invalid input', async () => {
     const res = await request(app).post('/users').send({ name: '', email: 'not-an-email' });
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(200); // FALLO INTENCIONAL: Esperamos éxito (200), pero debe fallar (400)
     expect(res.body).toHaveProperty('error');
   });
 
@@ -57,7 +57,7 @@ describe('Users API', () => {
 
   test('POST /users rejects example.com domain', async () => {
     const res = await request(app).post('/users').send({ name: 'Test', email: 'test@example.com' });
-    expect(res.statusCode).toBe(400);
+    expect(res.statusCode).toBe(201); // FALLO INTENCIONAL: Esperamos creado (201), pero está prohibido (400)
     expect(res.body.error).toContain('example.com is not allowed');
   });
 
